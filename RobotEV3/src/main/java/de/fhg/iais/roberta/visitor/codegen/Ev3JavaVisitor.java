@@ -504,23 +504,33 @@ public final class Ev3JavaVisitor extends AbstractJavaVisitor implements IEv3Vis
 
     @Override
     public Void visitColorSensor(ColorSensor<Void> colorSensor) {
+        String colorSensorType = this.brickConfiguration.getConfigurationComponent(colorSensor.getPort()).getComponentType();
         String colorSensorPort = "SensorPort.S" + colorSensor.getPort();
-        switch ( colorSensor.getMode() ) {
-            case SC.AMBIENTLIGHT:
-                this.sb.append("hal.getColorSensorAmbient(" + colorSensorPort + ")");
-                break;
-            case SC.COLOUR:
-                this.sb.append("hal.getColorSensorColour(" + colorSensorPort + ")");
-                break;
-            case SC.LIGHT:
-                this.sb.append("hal.getColorSensorRed(" + colorSensorPort + ")");
-                break;
-            case SC.RGB:
-                this.sb.append("hal.getColorSensorRgb(" + colorSensorPort + ")");
-                break;
-            default:
-                throw new DbcException("Invalide mode for Color Sensor!");
+        if ( colorSensorType.toLowerCase().contains(SC.HT_COLOR.toLowerCase()) ) {
+            // TODO
+            this.sb.append("TODO");
+        } else if ( colorSensorType.toLowerCase().contains(SC.COLOR.toLowerCase()) ) {
+            switch ( colorSensor.getMode() ) {
+                case SC.AMBIENTLIGHT:
+                    this.sb.append("hal.getColorSensorAmbient(" + colorSensorPort + ")");
+                    break;
+                case SC.COLOUR:
+                    this.sb.append("hal.getColorSensorColour(" + colorSensorPort + ")");
+                    break;
+                case SC.LIGHT:
+                    this.sb.append("hal.getColorSensorRed(" + colorSensorPort + ")");
+                    break;
+                case SC.RGB:
+                    this.sb.append("hal.getColorSensorRgb(" + colorSensorPort + ")");
+                    break;
+                default:
+                    throw new DbcException("Invalide mode for Color Sensor!");
+            }
+        } else {
+            throw new DbcException("Invalid sensor type:" + colorSensorType + "!");
         }
+
+
         return null;
     }
 
@@ -1222,6 +1232,8 @@ public final class Ev3JavaVisitor extends AbstractJavaVisitor implements IEv3Vis
                 return "CompassSensorMode." + sensorMode;
             case SC.IRSEEKER:
                 return "IRSeekerSensorMode." + sensorMode;
+            case SC.HT_COLOR:
+                return "TODO"; // TODO
             default:
                 throw new DbcException("There is mapping missing for " + sensorType + " with the old enums!");
         }
