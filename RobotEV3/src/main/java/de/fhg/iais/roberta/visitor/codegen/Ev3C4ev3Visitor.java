@@ -1209,18 +1209,24 @@ public class Ev3C4ev3Visitor extends AbstractCppVisitor implements IEv3Visitor<V
     }
 
     private void visitHiTecColorSensor(String port, String mode) {
+        String functionName;
         switch ( mode ) {
             case SC.COLOUR:
-                this.sb.append("NEPOReadHTColorSensorV2(" + port + ")");
+                functionName = "NEPOReadHTColorSensorV2";
                 break;
             case SC.LIGHT:
+                functionName = "NEPOReadHTColorSensorV2Light";
+                break;
             case SC.AMBIENTLIGHT:
-                this.sb.append("NEPOReadHTColorSensorV2Light(" + port + ", " + getColorSensorLightModeConstant(mode) + ")");
+                functionName = "NEPOReadHTColorSensorV2AmbientLight";
                 break;
             case SC.RGB:
-                this.sb.append("NEPOReadHTColorSensorV2RGBA(" + port + ")");
+                functionName = "NEPOReadHTColorSensorV2RGB";
                 break;
+            default:
+                throw new DbcException("Invalid mode for HT Color Sensor V2!");
         }
+        this.sb.append(functionName + "(" + port + ")");
     }
 
     private void visitEV3ColorSensor(String port, String mode) {
@@ -1229,23 +1235,14 @@ public class Ev3C4ev3Visitor extends AbstractCppVisitor implements IEv3Visitor<V
                 this.sb.append("ReadEV3ColorSensor(" + port + ")");
                 break;
             case SC.LIGHT:
+                this.sb.append("ReadEV3ColorSensorLight(" + port + ", ReflectedLight)");
+                break;
             case SC.AMBIENTLIGHT:
-                this.sb.append("ReadEV3ColorSensorLight(" + port + ", " + getColorSensorLightModeConstant(mode) + ")");
+                this.sb.append("ReadEV3ColorSensorLight(" + port + ", AmbientLight)");
                 break;
             case SC.RGB:
                 this.sb.append("NEPOReadEV3ColorSensorRGB(" + port + ")");
                 break;
-        }
-    }
-
-    private String getColorSensorLightModeConstant(String mode) {
-        switch ( mode ) {
-            case SC.LIGHT:
-                return "ReflectedLight";
-            case SC.AMBIENTLIGHT:
-                return "AmbientLight";
-            default:
-                throw new DbcException("Unknown color sensor light mode");
         }
     }
 

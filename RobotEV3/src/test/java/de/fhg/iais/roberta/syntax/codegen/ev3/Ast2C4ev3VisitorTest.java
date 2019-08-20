@@ -444,9 +444,9 @@ public class Ast2C4ev3VisitorTest {
                 + "std::list<double> ___rgb = ((std::list<double>){0, 0, 0});\n"
                 + BEGIN_MAIN__NULL_NULL_HTCOLORV2_NULL
                 + "___color = NEPOReadHTColorSensorV2(IN_3);\n"
-                + "___light = NEPOReadHTColorSensorV2Light(IN_3, ReflectedLight);\n"
-                + "___light = NEPOReadHTColorSensorV2Light(IN_3, AmbientLight);\n"
-                + "___rgb = NEPOReadHTColorSensorV2RGBA(IN_3);\n"
+                + "___light = NEPOReadHTColorSensorV2Light(IN_3);\n"
+                + "___light = NEPOReadHTColorSensorV2AmbientLight(IN_3);\n"
+                + "___rgb = NEPOReadHTColorSensorV2RGB(IN_3);\n"
                 + END_MAIN;
         checkCodeGeneratorForInput("/syntax/code_generator/java/read_hitec_color_sensor_v2_in_different_modes.xml", expectedCode, configuration);
     }
