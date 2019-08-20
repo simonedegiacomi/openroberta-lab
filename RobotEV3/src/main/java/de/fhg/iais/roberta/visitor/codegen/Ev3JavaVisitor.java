@@ -7,6 +7,8 @@ import static de.fhg.iais.roberta.mode.general.ListElementOperations.GET_REMOVE;
 import static de.fhg.iais.roberta.mode.general.ListElementOperations.INSERT;
 import static de.fhg.iais.roberta.mode.general.ListElementOperations.REMOVE;
 import static de.fhg.iais.roberta.mode.general.ListElementOperations.SET;
+import static de.fhg.iais.roberta.visitor.codegen.utilities.ColorSensorUtils.isHiTecColorSensor;
+import static de.fhg.iais.roberta.visitor.codegen.utilities.ColorSensorUtils.isEV3ColorSensor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +25,6 @@ import de.fhg.iais.roberta.components.ConfigurationComponent;
 import de.fhg.iais.roberta.components.UsedActor;
 import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.inter.mode.action.ILanguage;
-import de.fhg.iais.roberta.mode.action.Language;
 import de.fhg.iais.roberta.mode.general.IndexLocation;
 import de.fhg.iais.roberta.mode.general.ListElementOperations;
 import de.fhg.iais.roberta.syntax.BlockType;
@@ -504,34 +505,49 @@ public final class Ev3JavaVisitor extends AbstractJavaVisitor implements IEv3Vis
 
     @Override
     public Void visitColorSensor(ColorSensor<Void> colorSensor) {
-        String colorSensorType = this.brickConfiguration.getConfigurationComponent(colorSensor.getPort()).getComponentType();
         String colorSensorPort = "SensorPort.S" + colorSensor.getPort();
-        if ( colorSensorType.toLowerCase().contains(SC.HT_COLOR.toLowerCase()) ) {
-            // TODO
-            this.sb.append("TODO");
-        } else if ( colorSensorType.toLowerCase().contains(SC.COLOR.toLowerCase()) ) {
-            switch ( colorSensor.getMode() ) {
-                case SC.AMBIENTLIGHT:
-                    this.sb.append("hal.getColorSensorAmbient(" + colorSensorPort + ")");
-                    break;
-                case SC.COLOUR:
-                    this.sb.append("hal.getColorSensorColour(" + colorSensorPort + ")");
-                    break;
-                case SC.LIGHT:
-                    this.sb.append("hal.getColorSensorRed(" + colorSensorPort + ")");
-                    break;
-                case SC.RGB:
-                    this.sb.append("hal.getColorSensorRgb(" + colorSensorPort + ")");
-                    break;
-                default:
-                    throw new DbcException("Invalide mode for Color Sensor!");
-            }
+        String colorSensorType = this.brickConfiguration.getConfigurationComponent(colorSensor.getPort()).getComponentType();
+        String colorSensorMode = colorSensor.getMode();
+        String methodName;
+        if ( isHiTecColorSensor(colorSensorType) ) {
+            methodName = getHiTecColorSensorMethodName(colorSensorMode);
+        } else if ( isEV3ColorSensor(colorSensorType) ) {
+            methodName = getEV3ColorSensorMethodName(colorSensorMode);
         } else {
-            throw new DbcException("Invalid sensor type:" + colorSensorType + "!");
+            throw new DbcException("Invalid color sensor type: " + colorSensorType);
         }
-
-
+        this.sb.append(methodName + "(" + colorSensorPort + ")");
         return null;
+    }
+
+    private String getHiTecColorSensorMethodName(String mode) {
+        switch ( mode ) {
+            case SC.COLOUR:
+                return "hal.getHiTecColorSensorV2Colour";
+            case SC.LIGHT:
+                return "hal.getHiTecColorSensorV2Light";
+            case SC.AMBIENTLIGHT:
+                return "hal.getHiTecColorSensorV2Ambient";
+            case SC.RGB:
+                return "hal.getHiTecColorSensorV2Rgb";
+            default:
+                throw new DbcException("Invalid mode for EV3 Color Sensor!");
+        }
+    }
+
+    private String getEV3ColorSensorMethodName(String mode) {
+        switch ( mode ) {
+            case SC.COLOUR:
+                return "hal.getColorSensorColour";
+            case SC.LIGHT:
+                return "hal.getColorSensorRed";
+            case SC.AMBIENTLIGHT:
+                return "hal.getColorSensorAmbient";
+            case SC.RGB:
+                return "hal.getColorSensorRgb";
+            default:
+                throw new DbcException("Invalid mode for EV3 Color Sensor!");
+        }
     }
 
     @Override
@@ -1233,7 +1249,7 @@ public final class Ev3JavaVisitor extends AbstractJavaVisitor implements IEv3Vis
             case SC.IRSEEKER:
                 return "IRSeekerSensorMode." + sensorMode;
             case SC.HT_COLOR:
-                return "TODO"; // TODO
+                return "HiTecColorSensorV2Mode." + sensorMode;
             default:
                 throw new DbcException("There is mapping missing for " + sensorType + " with the old enums!");
         }

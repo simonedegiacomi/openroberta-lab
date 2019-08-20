@@ -319,6 +319,27 @@ public class AstToEv3PythonVisitorTest {
     }
 
     @Test
+    public void testReadHiTecColorSensorV2InDifferentModes() throws Exception {
+        String a =
+            "" //
+                + IMPORTS
+                + make_globals("", CFG_COLOR_SENSOR)
+                + "color = 'white'\n"
+                + "light = 0\n"
+                + "rgb = BlocklyMethods.createListWith(0, 0, 0)\n"
+                + "def run():\n"
+                + "    global color, light, rgb\n"
+                + "    color = hal.getColorSensorColour('3')\n"
+                + "    light = hal.getColorSensorRed('3')\n"
+                + "    light = hal.getColorSensorAmbient('3')\n"
+                + "    rgb = hal.getColorSensorRgb('3')\n\n"
+                + MAIN_METHOD;
+
+        assertCodeIsOk(a, "/syntax/code_generator/java/read_hitec_color_sensor_v2_in_different_modes.xml");
+    }
+
+
+    @Test
     public void testRotateRegulatedUnregulatedForwardBackwardMotors() throws Exception {
         Configuration configuration = HelperEv3ForXmlTest.makeRotateRegulatedUnregulatedForwardBackwardMotors();
         String a =
