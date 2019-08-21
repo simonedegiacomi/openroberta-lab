@@ -165,22 +165,23 @@ public class Ev3C4ev3Visitor extends AbstractCppVisitor implements IEv3Visitor<V
 
     @Override
     protected void generateProgramPrefix(boolean withWrapping) {
-        generateConstants();
         generateImports();
-    }
-
-    private void generateConstants() {
-        this.sb.append("#define PROGRAM_NAME \"" + this.programName + "\"\n");
-        this.sb.append("#define WHEEL_DIAMETER " + this.brickConfiguration.getWheelDiameterCM() + "\n");
-        this.sb.append("#define TRACK_WIDTH " + this.brickConfiguration.getTrackWidthCM() + "\n");
         nlIndent();
+        generateConstants();
     }
 
     private void generateImports() {
         this.sb.append("#include <ev3.h>\n");
         this.sb.append("#include <math.h>\n");
         this.sb.append("#include <list>\n");
-        this.sb.append("#include \"NEPODefs.h\"");
+        this.sb.append("#include <string>\n");
+        this.sb.append("#include \"NEPODefs.h\"\n");
+    }
+
+    private void generateConstants() {
+        this.sb.append("const std::string PROGRAM_NAME = \"" + this.programName + "\";\n");
+        this.sb.append("const double WHEEL_DIAMETER = " + this.brickConfiguration.getWheelDiameterCM() + ";\n");
+        this.sb.append("const double TRACK_WIDTH = " + this.brickConfiguration.getTrackWidthCM() + ";");
     }
 
     @Override
