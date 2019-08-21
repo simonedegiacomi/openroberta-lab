@@ -5,8 +5,13 @@ import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class C4Ev3SourceCompiler {
 
@@ -54,13 +59,13 @@ public class C4Ev3SourceCompiler {
     }
 
     private String[] getCompilerArguments(String compilerExecutableFileName, String sourceCodeFileName, String binaryOutputFile) {
-        return new String[] {
+        List<String> arguments = new ArrayList<>(Arrays.asList(
             compilerExecutableFileName,
             sourceCodeFileName,
             "-o", binaryOutputFile,
-            "-I", compilerResourcesDir + "c4ev3/include/NEPO",
-            "-I", compilerResourcesDir + "c4ev3/include/c4ev3",
-            "-L", compilerResourcesDir + "c4ev3/" + staticLibraryFolderName,
+            "-I", compilerResourcesDir + "c4ev3/helper",
+            "-I", compilerResourcesDir + "c4ev3/ev3-api/include",
+            "-L", compilerResourcesDir + "c4ev3/ev3-api/" + staticLibraryFolderName,
             "-l", "ev3api",
             "-static-libstdc++",
             "-std=c++11",
@@ -71,8 +76,18 @@ public class C4Ev3SourceCompiler {
             "-fdata-sections",
             "-ffunction-sections",
             "-Wl,--gc-sections",
-            "-s",
-        };
+            "-s"
+        ));
+        arguments.addAll(2, getHelperCppFiles());
+        return arguments.toArray(new String[0]);
+    }
+
+    private List<String> getHelperCppFiles(){
+        File helperFolder = new File(compilerResourcesDir + "c4ev3/helper/");
+        List<String> cppFiles = Arrays.asList(helperFolder.list((file, name) -> name.contains(".cpp")));
+        return cppFiles.stream()
+            .map(fileName -> helperFolder.getPath() + "/" + fileName)
+            .collect(Collectors.toList());
     }
 
     private boolean executeCompilation(String[] compilerArguments) {
